@@ -14,15 +14,16 @@ import EnrollmentRoutes from "./Kanbas/Enrollments/routes.js";
 
 const port = process.env.PORT || 4000;
 const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb+srv://christinapiggy:je8IG42BrhqTBKTH@kanbas.xd973.mongodb.net/Kanbas"
-mongoose.connect(CONNECTION_STRING);
+//mongoose.connect(CONNECTION_STRING);
 
-const app = express();
+const app= express();
 app.use(
     cors({
              credentials: true,
              origin: process.env.NETLIFY_URL || "http://localhost:3000",
          })
 );
+
 const sessionOptions = {
     secret: process.env.SESSION_SECRET || "kanbas",
     resave: false,
