@@ -6,16 +6,23 @@ import cors from "cors";
 import Hello from "./Hello.js";
 import Lab5 from "./Lab5/index.js";
 import UserRoutes from "./Kanbas/Users/routes.js";
-import "dotenv/config";
 import CourseRoutes from "./Kanbas/Courses/routes.js";
 import ModuleRoutes from "./Kanbas/Module/routes.js";
 import AssignmentRoutes from "./Kanbas/Assignments/routes.js";
 import EnrollmentRoutes from "./Kanbas/Enrollments/routes.js";
+//import QuizRoutes from "./Kanbas/Quizzes/routes.js";
 
-const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb://127.0.0.1:27017/kanbas"
+const port = process.env.PORT || 4000;
+const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb+srv://christinapiggy:je8IG42BrhqTBKTH@kanbas.xd973.mongodb.net/Kanbas"
 mongoose.connect(CONNECTION_STRING);
 
-const app = express(); // create a new express instance
+const app = express();
+app.use(
+    cors({
+             credentials: true,
+             origin: process.env.NETLIFY_URL || "http://localhost:3000",
+         })
+);
 const sessionOptions = {
     secret: process.env.SESSION_SECRET || "kanbas",
     resave: false,
@@ -31,19 +38,36 @@ if (process.env.NODE_ENV !== "development") {
 }
 app.use(session(sessionOptions));
 app.use(express.json());
-app.use(
-    cors({
-             credentials: true,
-             origin: process.env.NETLIFY_URL || "http://localhost:3000",
-         })
-);
-
 UserRoutes(app);
 ModuleRoutes(app);
 CourseRoutes(app);
 AssignmentRoutes(app);
 EnrollmentRoutes(app);
-Lab5(app);
-Hello(app); // pass app reference to Hello
+//QuizRoutes(app);
 
-app.listen(process.env.PORT || 4000) // Listen to http://localhost:4000
+// 在 MongoDB 连接部分添加详细日志
+mongoose.connect(CONNECTION_STRING)
+    .then(() => {
+        console.log("MongoDB Connection String:", CONNECTION_STRING);
+        console.log("Successfully connected to MongoDB");
+    })
+    .catch((err) => {
+        console.error("MongoDB Connection Error:", err);
+    });
+
+// 添加请求日志中间件 (在 cors 和 session 配置之后)
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} ${req.method} ${req.url}`);
+    console.log("Request Headers:", req.headers);
+    console.log("Session:", req.session);
+    next();
+});
+
+// 在路由处理中添加错误处理
+app.use((err, req, res, next) => {
+    console.error("Error occurred:", err);
+    console.error("Stack trace:", err.stack);
+    res.status(500).json({ message: "Internal server error", error: err.message });
+});
+
+app.listen(port);
