@@ -7,7 +7,7 @@ import Hello from "./Hello.js";
 import Lab5 from "./Lab5/index.js";
 import UserRoutes from "./Kanbas/Users/routes.js";
 import CourseRoutes from "./Kanbas/Courses/routes.js";
-import ModuleRoutes from "./Kanbas/Module/routes.js";
+import ModuleRoutes from "./Kanbas/Modules/routes.js";
 import AssignmentRoutes from "./Kanbas/Assignments/routes.js";
 import EnrollmentRoutes from "./Kanbas/Enrollments/routes.js";
 //import QuizRoutes from "./Kanbas/Quizzes/routes.js";
@@ -17,12 +17,19 @@ const CONNECTION_STRING = process.env.MONGO_CONNECTION_STRING || "mongodb+srv://
 //mongoose.connect(CONNECTION_STRING);
 
 const app= express();
-app.use(
-    cors({
-             credentials: true,
-             origin: process.env.NETLIFY_URL || "http://localhost:3000",
-         })
-);
+
+app.use(cors({
+                 origin: (origin, callback) => {
+                     if (!origin || whitelist.indexOf(origin) !== -1) {
+                         callback(null, true)
+                     } else {
+                         callback(new Error('Not allowed by CORS'))
+                     }
+                 },
+                 credentials: true, // Important if you need cookies or authentication
+             }));
+
+const whitelist = ['http://localhost:3000', 'https://glistening-gnome-fb1d1f.netlify.app'];
 
 const sessionOptions = {
     secret: process.env.SESSION_SECRET || "kanbas",

@@ -1,5 +1,5 @@
 import * as dao from "./dao.js";
-import * as modulesDao from "../Module/dao.js";
+import * as modulesDao from "../Modules/dao.js";
 export default function CourseRoutes(app) {
     app.delete("/api/courses/:courseId", (req, res) => {
         const { courseId } = req.params;
